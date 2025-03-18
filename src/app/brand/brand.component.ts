@@ -91,8 +91,7 @@ export class BrandComponent implements OnInit {
     const date = this.searchForm.value.date || '';
     this.brandService.getPaginationBrand(page, search, date).subscribe({
       next: (response: BrandPagination) => {
-        console.log('data brands', response.brands);
-        this.brands = response.brands; // Single assignment
+        this.brands = response.brands; 
         this.currentPage = response.currentPage;
         this.totalPages = response.totalPages;
         this.totalBrands = response.totalBrands;

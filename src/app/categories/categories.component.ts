@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CategoryPagination, CategoryType } from '../model/category.type';
 import { CategoryService } from '../services/category/category.service';
@@ -10,26 +10,27 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import {
-  NavigationCancel,
+  Router,
+  NavigationStart,
   NavigationEnd,
   NavigationError,
-  NavigationStart,
-  Router,
+  NavigationCancel,
 } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { InstantiateExpr } from '@angular/compiler';
 
 @Component({
   selector: 'app-categories',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './categories.component.html',
-  styleUrl: './categories.component.css',
+  styleUrls: ['./categories.component.css'],
 })
-export class CategoriesComponent implements OnInit {
+export class CategoriesComponent implements OnInit, OnDestroy {
   categories: CategoryType[] = [];
-  searchForm: FormGroup; // Define the FormGroup for the search form
-  currentPage = 1;
-  totalPages = 1;
+  searchForm: FormGroup;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  totalCategories: number = 0;
+  perPage: number = 10;
   noData: boolean = false;
 
   // loading
@@ -44,8 +45,6 @@ export class CategoriesComponent implements OnInit {
     this.searchForm = this.fb.group({
       search: [''], // Initialize search field with an empty value
     });
-
-    // loading
   }
 
   ngOnInit(): void {
@@ -54,27 +53,29 @@ export class CategoriesComponent implements OnInit {
     this.searchForm.valueChanges.subscribe(() => {
       this.currentPage = 1; // Reset to the first page on each search change
       this.loadCategories();
+    });
 
-      // loading
-      this.routerSubscription = this.router.events.subscribe((event) => {
-        if (event instanceof NavigationStart) {
-          this.loading = true;
-        } else if (
-          event instanceof NavigationEnd ||
-          event instanceof NavigationError ||
-          event instanceof NavigationCancel
-        ) {
-          this.loading = false;
-          this.loadCategories();
-        }
-      });
+    // loading
+    this.routerSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.loading = true;
+      } else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationError ||
+        event instanceof NavigationCancel
+      ) {
+        this.loading = false;
+        this.loadCategories();
+      }
     });
   }
+
   ngOnDestroy(): void {
     if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe;
+      this.routerSubscription.unsubscribe();
     }
   }
+
   // Load categories based on the search term and current page
   loadCategories(): void {
     const search = this.searchForm.value.search || ''; // Get the search term from the form
@@ -83,6 +84,7 @@ export class CategoriesComponent implements OnInit {
         this.categories = response.categories;
         this.currentPage = response.currentPage;
         this.totalPages = response.totalPage;
+        this.totalCategories = response.totalCategories;
         this.noData = this.categories.length === 0;
       },
       error: () => {
@@ -135,15 +137,40 @@ export class CategoriesComponent implements OnInit {
             });
           },
           error: (err) => {
-            console.error('Error deleting brand:', err);
+            console.error('Error deleting category:', err);
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: 'Failed to delete brand.',
+              text: 'Failed to delete category.',
             });
           },
         });
       }
     });
+  }
+
+  // pagination
+  // pagination
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadCategories(); // Actually call loadCategories
+    }
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage() {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  getPaginationRange(): number[] {
+    const range = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      range.push(i); // Push the actual page numbers
+    }
+    return range;
   }
 }
