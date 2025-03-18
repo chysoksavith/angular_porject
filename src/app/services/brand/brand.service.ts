@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { Brand } from '../../model/brand.type';
+import { Brand, BrandPagination } from '../../model/brand.type';
 
 @Injectable({
   providedIn: 'root',
@@ -10,10 +10,17 @@ export class BrandService {
   private apiUrl = 'http://localhost:5000/api/brands';
   constructor(private http: HttpClient) {}
 
-  getBrands(): Observable<Brand[]> {
+  getBrands(page: number): Observable<Brand[]> {
+    console.log('Fetching brands from:', `${this.apiUrl}?page=${page}`);
+
     return this.http
-      .get<{ brands: Brand[] }>(this.apiUrl)
+      .get<BrandPagination>(`${this.apiUrl}?=page=${page}`)
       .pipe(map((response) => response.brands));
+  }
+  getPaginationBrand(page: number = 1): Observable<BrandPagination> {
+    const url = `${this.apiUrl}?page=${page}`; // Correctly construct URL
+    console.log('Fetching brands from:', url); // Log the exact URL for debugging
+    return this.http.get<BrandPagination>(url); // Use the constructed URL
   }
   getBrandById(id: number): Observable<Brand> {
     return this.http.get<Brand>(`${this.apiUrl}/${id}`);

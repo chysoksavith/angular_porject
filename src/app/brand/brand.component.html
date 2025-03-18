@@ -87,15 +87,37 @@
               >
                 Edit
               </button>
+              <button
+                class="btn btn-link text-danger"
+                (click)="brandDelete(brand.id)"
+              >
+                Delete
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+      <nav aria-label="Page navigation" *ngIf="totalPages > 1">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disable]="currentPage === 1">
+            <a href="#" class="page-link" (click)="previousPage(); $event.preventDefault()">Previous</a>
+          </li>
+          <li class="page-item" *ngFor="let page of getPaginationRange()" [class.active]="page === currentPage">
+            <a href="#" class="page-link" (click)="goToPage(page); $event.preventDefault()">{{page}}</a>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a href="#" class="page-link" (click)="nextPage(); $event.preventDefault()">Next</a>
+          </li>
+        </ul>
+
+      </nav>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
+<div class="text-center mt-2" *ngIf="totalBrands > 0">
+  Showing {{ (currentPage - 1) * perPage + 1 }} to {{ (currentPage * perPage > totalBrands) ? totalBrands : currentPage * perPage }} of {{ totalBrands }} brands
+</div>
 <!-- Modal -->
 <div class="modal" [ngClass]="{ 'd-block': isModalOpen }">
   <div class="modal-content">

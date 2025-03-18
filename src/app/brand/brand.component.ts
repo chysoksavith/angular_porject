@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Brand } from '../model/brand.type';
+import { Brand, BrandPagination } from '../model/brand.type';
 import { BrandService } from '../services/brand/brand.service';
 import {
   FormBuilder,
@@ -23,6 +23,11 @@ export class BrandComponent implements OnInit {
   isModalOpen: boolean = false;
   isEditMode: boolean = false;
   successMessage: string | null = null;
+  // pagination
+  currentPage: number = 1;
+  totalPages: number = 1;
+  totalBrands: number = 0;
+  perPage: number = 10;
 
   constructor(private brandService: BrandService, private fb: FormBuilder) {
     this.brandForm = this.fb.group({
@@ -32,17 +37,31 @@ export class BrandComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadBrands();
+    this.loadBrands(this.currentPage);
   }
 
   // get all brands
-  loadBrands() {
-    this.brandService.getBrands().subscribe({
-      next: (brands) => {
-        console.log('data brands', brands);
-        this.brands = brands;
-      },
+  loadBrands(page: number) {
+    // this.brandService.getBrands().subscribe({
+    //   next: (brands) => {
+    //     console.log('data brands', brands);
+    //     this.brands = brands;
+    //   },
 
+    //   error: (err) => {
+    //     console.log('fetching data brand error: ', err);
+    //   },
+    // });
+    this.brandService.getPaginationBrand(this.currentPage).subscribe({
+      next: (response: BrandPagination) => {
+        console.log('data brands', response.brands);
+        this.brands = response.brands;
+        this.brands = response.brands;
+        this.currentPage = response.currentPage;
+        this.totalPages = response.totalPages;
+        this.totalBrands = response.totalBrands;
+        this.perPage = response.perPage;
+      },
       error: (err) => {
         console.log('fetching data brand error: ', err);
       },
@@ -60,7 +79,7 @@ export class BrandComponent implements OnInit {
     if (this.isEditMode && this.brandForm.value) {
       this.brandService.updateBrand(brandData.id, brandData).subscribe({
         next: (updateBrand) => {
-          this.loadBrands();
+          this.loadBrands(this.currentPage);
           this.closeModal();
           Swal.fire({
             icon: 'success',
@@ -75,7 +94,7 @@ export class BrandComponent implements OnInit {
     } else {
       this.brandService.createBrand(brandData).subscribe({
         next: (newBrand) => {
-          this.loadBrands();
+          this.loadBrands(this.currentPage);
           this.closeModal();
           Swal.fire({
             icon: 'success',
@@ -89,7 +108,63 @@ export class BrandComponent implements OnInit {
       });
     }
   }
-  // 
+  // delete brand
+  brandDelete(id: number) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.brandService.deleteBrand(id).subscribe({
+          next: () => {
+            console.log(`Brand with ID ${id} deleted successfully`);
+            this.loadBrands(this.currentPage);
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Brand has been deleted.',
+              timer: 2000,
+              showConfirmButton: false,
+            });
+          },
+          error: (err) => {
+            console.error('Error deleting brand:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Failed to delete brand.',
+            });
+          },
+        });
+      }
+    });
+  }
+  // pagination method
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadBrands(page);
+    }
+  }
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage() {
+    this.goToPage(this.currentPage - 1);
+  }
+  getPaginationRange(): number[] {
+    const range = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      range.push(i);
+    }
+    return range;
+  }
   // open modal
   openCreateModal() {
     this.brandForm.reset({ name: '' });
