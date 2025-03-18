@@ -1,0 +1,78 @@
+<div class="container-fluid mt-5">
+  <div class="text-center" *ngIf="!loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading...</p>
+  </div>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2>Categories Management</h2>
+
+      <button class="btn btn-primary mb-3">Add New Category</button>
+    </div>
+    <div class="card-body mt">
+      <div class="table-responsive shadow-sm rounded-lg">
+        <div
+          class="d-flex flex-column flex-sm-row flex-wrap mb-4 justify-content-between align-items-center"
+        >
+          <form
+            class="d-flex align-items-center gap-3"
+            [formGroup]="searchForm"
+          >
+            <div>
+              <input
+                type="text"
+                id="table-search"
+                class="form-control form-control-sm w-80"
+                placeholder="Search for items"
+                formControlName="search"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="resetSearch()"
+            >
+              Reset
+            </button>
+          </form>
+        </div>
+
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">No#</th>
+              <th scope="col">Category name</th>
+              <th scope="col">Created at</th>
+              <th scope="col">Updated at</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngIf="!noData">
+              <tr *ngFor="let category of categories; let index = index">
+                <td>{{ index + 1 }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ formatDate(category.created_at) }}</td>
+                <td>{{ formatDate(category.updated_at) }}</td>
+                <td>
+                  <button class="btn btn-link text-primary">Edit</button>
+                  <button
+                    class="btn btn-link text-danger"
+                    (click)="categoryDelete(category.id)"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+            <tr *ngIf="noData" class="text-center">
+              <td colspan="5">Data not found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

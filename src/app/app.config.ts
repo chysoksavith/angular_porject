@@ -4,7 +4,7 @@ import { provideRouter, RouterModule } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,5 +14,6 @@ export const appConfig: ApplicationConfig = {
     RouterModule,
     CommonModule,
     ReactiveFormsModule,
+    FormsModule
   ],
 };

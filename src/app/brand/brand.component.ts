@@ -161,7 +161,6 @@ export class BrandComponent implements OnInit {
       if (result.isConfirmed) {
         this.brandService.deleteBrand(id).subscribe({
           next: () => {
-            console.log(`Brand with ID ${id} deleted successfully`);
             this.loadBrands(this.currentPage);
             Swal.fire({
               icon: 'success',
