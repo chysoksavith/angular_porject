@@ -17,10 +17,20 @@ export class BrandService {
       .get<BrandPagination>(`${this.apiUrl}?=page=${page}`)
       .pipe(map((response) => response.brands));
   }
-  getPaginationBrand(page: number = 1): Observable<BrandPagination> {
-    const url = `${this.apiUrl}?page=${page}`; // Correctly construct URL
-    console.log('Fetching brands from:', url); // Log the exact URL for debugging
-    return this.http.get<BrandPagination>(url); // Use the constructed URL
+  getPaginationBrand(
+    page: number = 1,
+    search: string = '',
+    date: string = ''
+  ): Observable<BrandPagination> {
+    let url = `${this.apiUrl}?page=${page}`;
+    console.log('Fetching brands from:', url);
+    if (search) {
+      url += `&search=${search}`;
+    }
+    if (date) {
+      url += `&date=${date}`;
+    }
+    return this.http.get<BrandPagination>(url);
   }
   getBrandById(id: number): Observable<Brand> {
     return this.http.get<Brand>(`${this.apiUrl}/${id}`);

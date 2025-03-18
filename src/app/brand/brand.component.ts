@@ -20,6 +20,7 @@ import Swal from 'sweetalert2';
 export class BrandComponent implements OnInit {
   brands: Brand[] = [];
   brandForm: FormGroup;
+  searchForm: FormGroup;
   isModalOpen: boolean = false;
   isEditMode: boolean = false;
   successMessage: string | null = null;
@@ -29,44 +30,48 @@ export class BrandComponent implements OnInit {
   totalBrands: number = 0;
   perPage: number = 10;
 
+  // filter date and search
+  noData: boolean = false;
   constructor(private brandService: BrandService, private fb: FormBuilder) {
     this.brandForm = this.fb.group({
       id: [null],
       name: ['', [Validators.required, Validators.minLength(2)]],
     });
+    this.searchForm = this.fb.group({
+      search: [''],
+      date: [''],
+    });
   }
 
   ngOnInit(): void {
     this.loadBrands(this.currentPage);
+    // Subscribe to form changes for real-time search
+    this.searchForm.valueChanges.subscribe(() => {
+      this.currentPage = 1; // Reset to page 1 on filter change
+      this.loadBrands(this.currentPage);
+    });
   }
 
-  // get all brands
   loadBrands(page: number) {
-    // this.brandService.getBrands().subscribe({
-    //   next: (brands) => {
-    //     console.log('data brands', brands);
-    //     this.brands = brands;
-    //   },
-
-    //   error: (err) => {
-    //     console.log('fetching data brand error: ', err);
-    //   },
-    // });
-    this.brandService.getPaginationBrand(this.currentPage).subscribe({
+    const search = this.searchForm.value.search || '';
+    const date = this.searchForm.value.date || '';
+    this.brandService.getPaginationBrand(page, search, date).subscribe({
       next: (response: BrandPagination) => {
         console.log('data brands', response.brands);
-        this.brands = response.brands;
-        this.brands = response.brands;
+        this.brands = response.brands; // Single assignment
         this.currentPage = response.currentPage;
         this.totalPages = response.totalPages;
         this.totalBrands = response.totalBrands;
         this.perPage = response.perPage;
+        this.noData = this.brands.length === 0;
       },
       error: (err) => {
         console.log('fetching data brand error: ', err);
+        this.noData = true;
       },
     });
   }
+
   // onSave Brand
   onSaveBrand() {
     if (this.brandForm.invalid) {
@@ -144,6 +149,13 @@ export class BrandComponent implements OnInit {
       }
     });
   }
+  // search
+  resetFilter() {
+    this.searchForm.reset();
+    this.currentPage = 1;
+    this.loadBrands(this.currentPage); // Reload after reset
+  }
+
   // pagination method
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
