@@ -1,0 +1,152 @@
+<div class="container mt-5">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h2>Brand Management</h2>
+
+    <button class="btn btn-primary mb-3" (click)="openCreateModal()">
+      Add New Brand
+    </button>
+  </div>
+  <div class="card-body mt">
+    @if (successMessage) {
+    <div class="alert alert-success mt-2">
+      {{ successMessage }}
+    </div>
+    }
+
+    <div class="table-responsive shadow-sm rounded-lg">
+      <div
+        class="d-flex flex-column flex-sm-row flex-wrap mb-4 justify-content-between align-items-center"
+      >
+        <div>
+          <button
+            id="dropdownRadioButton"
+            class="btn btn-outline-secondary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Last 30 days
+          </button>
+          <!-- Dropdown menu -->
+          <ul class="dropdown-menu" aria-labelledby="dropdownRadioButton">
+            <li><a class="dropdown-item" href="#">Last day</a></li>
+            <li><a class="dropdown-item" href="#">Last 7 days</a></li>
+            <li><a class="dropdown-item" href="#">Last 30 days</a></li>
+            <li><a class="dropdown-item" href="#">Last month</a></li>
+            <li><a class="dropdown-item" href="#">Last year</a></li>
+          </ul>
+        </div>
+
+        <div class="relative">
+          <div
+            class="position-absolute top-0 left-0 end-0 d-flex align-items-center ps-3"
+          >
+            <svg
+              class="w-5 h-5 text-muted"
+              aria-hidden="true"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="table-search"
+            class="form-control form-control-sm w-80"
+            placeholder="Search for items"
+          />
+        </div>
+      </div>
+
+      <table class="table table-striped table-hover">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">No#</th>
+            <th scope="col">Brand name</th>
+            <th scope="col">Created at</th>
+            <th scope="col">Updated at</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let brand of brands; let index = index">
+            <td>{{ index + 1 }}</td>
+            <td>{{ brand.name }}</td>
+            <td>{{ formatDate(brand.created_at) }}</td>
+            <td>{{ formatDate(brand.updated_at) }}</td>
+            <td>
+              <button
+                class="btn btn-link text-primary"
+                (click)="openEditMode(brand)"
+              >
+                Edit
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal" [ngClass]="{ 'd-block': isModalOpen }">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        {{ isEditMode ? "Edit Brand" : "Create Brand" }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeModal()"></button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="brandForm">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="name"
+            [class.is-invalid]="nameControl?.touched && nameControl?.invalid"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="nameControl?.errors?.['required']"
+          >
+            Name is required
+          </div>
+          <div
+            class="invalid-feedback"
+            *ngIf="nameControl?.errors?.['minlength']"
+          >
+            Name must be at least 2 characters long
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeModal()">
+        Close
+      </button>
+      <button
+        type="button"
+        (click)="onSaveBrand()"
+        class="btn btn-primary"
+        [disabled]="brandForm.invalid"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+@if (isModalOpen) {
+<div class="modal-backdrop fade show" (click)="closeModal()"></div>
+}

@@ -1,0 +1,31 @@
+.container {
+  padding: 20px;
+}
+
+.modal {
+  display: none;
+}
+
+.modal.d-block {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.modal-content {
+  margin: 15% auto;
+  width: 90%;
+  max-width: 500px;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.w-80 {
+  width: 20rem;
+}
