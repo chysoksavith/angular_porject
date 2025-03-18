@@ -9,6 +9,14 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { Subscription } from 'rxjs';
+import {
+  NavigationStart,
+  Router,
+  NavigationEnd,
+  NavigationError,
+  NavigationCancel,
+} from '@angular/router';
 
 @Component({
   selector: 'app-brand',
@@ -32,7 +40,14 @@ export class BrandComponent implements OnInit {
 
   // filter date and search
   noData: boolean = false;
-  constructor(private brandService: BrandService, private fb: FormBuilder) {
+  // loading
+  loading: boolean = false;
+  private routerSubscription: Subscription | undefined;
+  constructor(
+    private brandService: BrandService,
+    private fb: FormBuilder,
+    private router: Router
+  ) {
     this.brandForm = this.fb.group({
       id: [null],
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -49,9 +64,28 @@ export class BrandComponent implements OnInit {
     this.searchForm.valueChanges.subscribe(() => {
       this.currentPage = 1; // Reset to page 1 on filter change
       this.loadBrands(this.currentPage);
+
+      // loading
+      this.routerSubscription = this.router.events.subscribe((event) => {
+        if (event instanceof NavigationStart) {
+          this.loading = true;
+        } else if (
+          event instanceof NavigationEnd ||
+          event instanceof NavigationError ||
+          event instanceof NavigationCancel
+        ) {
+          this.loading = false;
+          this.loadBrands(this.currentPage);
+        }
+      });
     });
   }
-
+  // destroy prevent memory leak
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
   loadBrands(page: number) {
     const search = this.searchForm.value.search || '';
     const date = this.searchForm.value.date || '';
