@@ -20,6 +20,17 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'category/create',
+    loadComponent: () =>
+      import(
+        '../app/categories/create-category/create-category.component'
+      ).then((m) => m.CreateCategoryComponent),
+  },
+  {
+    path: 'category/update/:id',
+    
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('../app/components/pagenotfound/pagenotfound.component').then(

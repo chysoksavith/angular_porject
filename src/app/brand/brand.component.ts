@@ -91,7 +91,7 @@ export class BrandComponent implements OnInit {
     const date = this.searchForm.value.date || '';
     this.brandService.getPaginationBrand(page, search, date).subscribe({
       next: (response: BrandPagination) => {
-        this.brands = response.brands; 
+        this.brands = response.brands;
         this.currentPage = response.currentPage;
         this.totalPages = response.totalPages;
         this.totalBrands = response.totalBrands;
@@ -106,46 +106,103 @@ export class BrandComponent implements OnInit {
   }
 
   // onSave Brand
+  // onSaveBrand() {
+  //   if (this.brandForm.invalid) {
+  //     this.brandForm.markAllAsTouched();
+  //     return;
+  //   }
+  //   const brandData: Brand = this.brandForm.value;
+
+  //   if (this.isEditMode && this.brandForm.value) {
+  //     this.brandService.updateBrand(brandData.id, brandData).subscribe({
+  //       next: (updateBrand) => {
+  //         this.loadBrands(this.currentPage);
+  //         this.closeModal();
+  //         Swal.fire({
+  //           icon: 'success',
+  //           title: 'Success',
+  //           text: 'Brand updated successfully!',
+  //           timer: 2000, // Auto-close after 2 seconds
+  //           showConfirmButton: false,
+  //         });
+  //       },
+  //       error: (err) => console.error('Error updating brand:', err),
+  //     });
+  //   } else {
+  //     this.brandService.createBrand(brandData).subscribe({
+  //       next: (newBrand) => {
+  //         this.loadBrands(this.currentPage);
+  //         this.closeModal();
+  //         Swal.fire({
+  //           icon: 'success',
+  //           title: 'Success',
+  //           text: 'Brand created successfully!',
+  //           timer: 2000, // Auto-close after 2 seconds
+  //           showConfirmButton: false,
+  //         });
+  //       },
+  //       error: (err) => console.error('Error creating brand:', err),
+  //     });
+  //   }
+  // }
   onSaveBrand() {
-    if (this.brandForm.invalid) {
-      console.log('Form is invalid:', this.brandForm.errors);
-      this.brandForm.markAllAsTouched();
+  if (this.brandForm.invalid) {
+    this.brandForm.markAllAsTouched();
+    return;
+  }
+
+  const brandData: Brand = this.brandForm.value;
+
+  if (this.isEditMode && brandData.id) {
+    // Get the original brand data for comparison
+    const originalBrand = this.brands.find(b => b.id === brandData.id);
+
+    if (originalBrand && originalBrand.name === brandData.name) {
+      // No changes detected
+      this.closeModal();
+      Swal.fire({
+        icon: 'info',
+        title: 'No Changes',
+        text: 'No modifications were made to the brand.',
+        timer: 2000,
+        showConfirmButton: false,
+      });
       return;
     }
-    const brandData: Brand = this.brandForm.value;
 
-    if (this.isEditMode && this.brandForm.value) {
-      this.brandService.updateBrand(brandData.id, brandData).subscribe({
-        next: (updateBrand) => {
-          this.loadBrands(this.currentPage);
-          this.closeModal();
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Brand updated successfully!',
-            timer: 2000, // Auto-close after 2 seconds
-            showConfirmButton: false,
-          });
-        },
-        error: (err) => console.error('Error updating brand:', err),
-      });
-    } else {
-      this.brandService.createBrand(brandData).subscribe({
-        next: (newBrand) => {
-          this.loadBrands(this.currentPage);
-          this.closeModal();
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Brand created successfully!',
-            timer: 2000, // Auto-close after 2 seconds
-            showConfirmButton: false,
-          });
-        },
-        error: (err) => console.error('Error creating brand:', err),
-      });
-    }
+    // If there are changes, proceed with update
+    this.brandService.updateBrand(brandData.id, brandData).subscribe({
+      next: (updateBrand) => {
+        this.loadBrands(this.currentPage);
+        this.closeModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Brand updated successfully!',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      },
+      error: (err) => console.error('Error updating brand:', err),
+    });
+  } else {
+    // Create new brand (no comparison needed)
+    this.brandService.createBrand(brandData).subscribe({
+      next: (newBrand) => {
+        this.loadBrands(this.currentPage);
+        this.closeModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Brand created successfully!',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      },
+      error: (err) => console.error('Error creating brand:', err),
+    });
   }
+}
   // delete brand
   brandDelete(id: number) {
     Swal.fire({

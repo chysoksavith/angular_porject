@@ -1,0 +1,5 @@
+.nav-link.active {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #f8f9fa; /* You can change this color to fit your design */
+}

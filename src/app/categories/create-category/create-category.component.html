@@ -1,0 +1,98 @@
+<div class="container-fluid mt-5">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>Create Category</h3>
+      <a class="btn btn-primary" [routerLink]="['/categories']">Back</a>
+    </div>
+    <div class="card-body mt">
+      <form [formGroup]="categoryForm" class="mt-4">
+        <div formArrayName="categories">
+          <div
+            *ngFor="let category of getCategoriesArray.controls; let i = index"
+            [formGroupName]="i"
+            class="card mb-3"
+          >
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="mb-3">
+                    <label class="form-label">Name #{{ i + 1 }}</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="name"
+                      [class.is-invalid]="
+                        category.get('name')?.touched &&
+                        category.get('name')?.invalid
+                      "
+                    />
+                    <div
+                      class="invalid-feedback"
+                      *ngIf="category.get('name')?.errors?.['required']"
+                    >
+                      Name is required
+                    </div>
+                    <div
+                      class="invalid-feedback"
+                      *ngIf="category.get('name')?.errors?.['minlength']"
+                    >
+                      Name must be at least 2 characters long
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="mb-3">
+                    <label class="form-label">Parent Category</label>
+                    <select class="form-select" formControlName="parent_id">
+                      <option [ngValue]="null">No Parent</option>
+                      <option *ngFor="let cat of categories" [ngValue]="cat.id">
+                        {{ cat.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button
+                    type="button"
+                    class="btn btn-danger w-100"
+                    (click)="removeCategoryInput(i)"
+                    [disabled]="getCategoriesArray.length === 1"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="addCategoryInput()"
+          >
+            Add Another Category
+          </button>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onSaveCategory()"
+            [disabled]="categoryForm.invalid"
+          >
+            Save Categories
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetForm()">
+            Reset
+          </button>
+          <a routerLink="/categories" class="btn btn-outline-secondary"
+            >Cancel</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

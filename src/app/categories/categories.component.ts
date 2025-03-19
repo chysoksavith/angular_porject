@@ -15,12 +15,13 @@ import {
   NavigationEnd,
   NavigationError,
   NavigationCancel,
+  RouterLink,
 } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.css'],
 })

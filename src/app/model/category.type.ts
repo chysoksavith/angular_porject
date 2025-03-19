@@ -7,10 +7,11 @@ export interface CategoryType {
   parent_id: number | null;
   created_at: string;
   updated_at: string;
+  children: CategoryType[];
 }
 
 export interface CategoryPagination {
-  categories: CategoryType[]; // Updated to use CategoryType
+  categories: CategoryType[];
   currentPage: number;
   totalPage: number;
   totalCategories: number;

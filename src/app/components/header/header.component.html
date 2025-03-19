@@ -10,13 +10,27 @@
       <nav>
         <ul class="nav">
           <li class="nav-item">
-            <a routerLink="/" class="nav-link text-white">Home</a>
+            <a
+              routerLink="/"
+              routerLinkActive="active"
+              class="nav-link text-white"
+              [routerLinkActiveOptions]="{ exact: true }"
+              >Home</a
+            >
           </li>
           <li class="nav-item">
-            <a routerLink="/brands" class="nav-link text-white">Brands</a>
+            <a
+              routerLink="/brands"
+              routerLinkActive="active"
+              class="nav-link text-white"
+              >Brands</a
+            >
           </li>
           <li class="nav-item">
-            <a routerLink="/categories" class="nav-link text-white"
+            <a
+              routerLink="/categories"
+              routerLinkActive="active"
+              class="nav-link text-white"
               >categories</a
             >
           </li>
