@@ -174,4 +174,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     }
     return range;
   }
+  // navigate
+  editCategory(id: number) {
+    this.router.navigate(['/category/update',id]);
+  }
 }

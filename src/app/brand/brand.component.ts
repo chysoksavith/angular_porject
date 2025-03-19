@@ -42,6 +42,9 @@ export class BrandComponent implements OnInit {
   noData: boolean = false;
   // loading
   loading: boolean = false;
+  // delete brand by selected
+  selectedBrandId: number[] = [];
+
   private routerSubscription: Subscription | undefined;
   constructor(
     private brandService: BrandService,
@@ -105,104 +108,64 @@ export class BrandComponent implements OnInit {
     });
   }
 
-  // onSave Brand
-  // onSaveBrand() {
-  //   if (this.brandForm.invalid) {
-  //     this.brandForm.markAllAsTouched();
-  //     return;
-  //   }
-  //   const brandData: Brand = this.brandForm.value;
-
-  //   if (this.isEditMode && this.brandForm.value) {
-  //     this.brandService.updateBrand(brandData.id, brandData).subscribe({
-  //       next: (updateBrand) => {
-  //         this.loadBrands(this.currentPage);
-  //         this.closeModal();
-  //         Swal.fire({
-  //           icon: 'success',
-  //           title: 'Success',
-  //           text: 'Brand updated successfully!',
-  //           timer: 2000, // Auto-close after 2 seconds
-  //           showConfirmButton: false,
-  //         });
-  //       },
-  //       error: (err) => console.error('Error updating brand:', err),
-  //     });
-  //   } else {
-  //     this.brandService.createBrand(brandData).subscribe({
-  //       next: (newBrand) => {
-  //         this.loadBrands(this.currentPage);
-  //         this.closeModal();
-  //         Swal.fire({
-  //           icon: 'success',
-  //           title: 'Success',
-  //           text: 'Brand created successfully!',
-  //           timer: 2000, // Auto-close after 2 seconds
-  //           showConfirmButton: false,
-  //         });
-  //       },
-  //       error: (err) => console.error('Error creating brand:', err),
-  //     });
-  //   }
-  // }
   onSaveBrand() {
-  if (this.brandForm.invalid) {
-    this.brandForm.markAllAsTouched();
-    return;
-  }
-
-  const brandData: Brand = this.brandForm.value;
-
-  if (this.isEditMode && brandData.id) {
-    // Get the original brand data for comparison
-    const originalBrand = this.brands.find(b => b.id === brandData.id);
-
-    if (originalBrand && originalBrand.name === brandData.name) {
-      // No changes detected
-      this.closeModal();
-      Swal.fire({
-        icon: 'info',
-        title: 'No Changes',
-        text: 'No modifications were made to the brand.',
-        timer: 2000,
-        showConfirmButton: false,
-      });
+    if (this.brandForm.invalid) {
+      this.brandForm.markAllAsTouched();
       return;
     }
 
-    // If there are changes, proceed with update
-    this.brandService.updateBrand(brandData.id, brandData).subscribe({
-      next: (updateBrand) => {
-        this.loadBrands(this.currentPage);
+    const brandData: Brand = this.brandForm.value;
+
+    if (this.isEditMode && brandData.id) {
+      // Get the original brand data for comparison
+      const originalBrand = this.brands.find((b) => b.id === brandData.id);
+
+      if (originalBrand && originalBrand.name === brandData.name) {
+        // No changes detected
         this.closeModal();
         Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Brand updated successfully!',
+          icon: 'info',
+          title: 'No Changes',
+          text: 'No modifications were made to the brand.',
           timer: 2000,
           showConfirmButton: false,
         });
-      },
-      error: (err) => console.error('Error updating brand:', err),
-    });
-  } else {
-    // Create new brand (no comparison needed)
-    this.brandService.createBrand(brandData).subscribe({
-      next: (newBrand) => {
-        this.loadBrands(this.currentPage);
-        this.closeModal();
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Brand created successfully!',
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      },
-      error: (err) => console.error('Error creating brand:', err),
-    });
+        return;
+      }
+
+      // If there are changes, proceed with update
+      this.brandService.updateBrand(brandData.id, brandData).subscribe({
+        next: (updateBrand) => {
+          this.loadBrands(this.currentPage);
+          this.closeModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Brand updated successfully!',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (err) => console.error('Error updating brand:', err),
+      });
+    } else {
+      // Create new brand (no comparison needed)
+      this.brandService.createBrand(brandData).subscribe({
+        next: (newBrand) => {
+          this.loadBrands(this.currentPage);
+          this.closeModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Brand created successfully!',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (err) => console.error('Error creating brand:', err),
+      });
+    }
   }
-}
   // delete brand
   brandDelete(id: number) {
     Swal.fire({
@@ -238,6 +201,84 @@ export class BrandComponent implements OnInit {
       }
     });
   }
+  // multi delte
+  // Multi-Delete (New)
+  deleteSelectedBrands() {
+    if (this.selectedBrandId.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Selection',
+        text: 'Please select at least one brand to delete.',
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete ${this.selectedBrandId.length} brand(s). This cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete them!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const deleteRequests = this.selectedBrandId.map((id) =>
+          this.brandService.deleteBrand(id).toPromise()
+        );
+
+        Promise.all(deleteRequests)
+          .then(() => {
+            this.loadBrands(this.currentPage);
+            this.selectedBrandId = []; // Clear selection
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: `${deleteRequests.length} brand(s) have been deleted.`,
+              timer: 2000,
+              showConfirmButton: false,
+            });
+          })
+          .catch((err) => {
+            console.error('Error deleting brands:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Failed to delete some or all selected brands.',
+            });
+          });
+      }
+    });
+  }
+
+  // Checkbox Handling for One-by-One Selection
+  toggleSelection(brandId: number) {
+    const index = this.selectedBrandId.indexOf(brandId);
+    if (index === -1) {
+      this.selectedBrandId.push(brandId);
+    } else {
+      this.selectedBrandId.splice(index, 1);
+    }
+  }
+
+  // Select/Deselect All
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.selectedBrandId = this.brands.map((brand) => brand.id);
+    } else {
+      this.selectedBrandId = [];
+    }
+  }
+
+  // Check if all are selected (for header checkbox state)
+  areAllSelected(): boolean {
+    return (
+      this.brands.length > 0 &&
+      this.selectedBrandId.length === this.brands.length
+    );
+  }
+
   // search
   resetFilter() {
     this.searchForm.reset();

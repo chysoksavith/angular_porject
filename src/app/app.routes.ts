@@ -28,7 +28,10 @@ export const routes: Routes = [
   },
   {
     path: 'category/update/:id',
-    
+    loadComponent: () =>
+      import('../app/categories/edit-category/edit-category.component').then(
+        (m) => m.EditCategoryComponent
+      ),
   },
   {
     path: '**',
